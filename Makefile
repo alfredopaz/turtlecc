@@ -1,24 +1,46 @@
-CXX = g++
-CPPFLAGS = -Iinclude
-CXXFLAGS = -std=c++11
-LDFLAGS = -lsfml-graphics -lsfml-window -lsfml-system
-SRC = src/Turtle.cc src/App.cc
-OBJ = $(SRC:.cc=.o)
-LIB = libcppTurtle.a
 
-all: example_cb example_obj example_fractal
+# Makefile que permite:  make APP=MiPrograma
 
-lib: $(OBJ)
-	ar rcs $(LIB) $(OBJ)
+# 1) Compilador y flags
+CXX       = g++
+CPPFLAGS  = -Iinclude
+CXXFLAGS  = -std=c++11
+LDFLAGS   = -lsfml-graphics -lsfml-window -lsfml-system
 
-example_cb: lib examples/main_callback.cc
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o turtle_example_cb examples/main_callback.cc $(LIB) $(LDFLAGS)
+# 2) Biblioteca estática (Turtle + App)
+LIB_SRCS  = src/Turtle.cc src/App.cc
+LIB_OBJS  = $(LIB_SRCS:.cc=.o)
+LIB       = libcppTurtle.a
 
-example_obj: lib examples/main_object.cc
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o turtle_example_obj examples/main_object.cc $(LIB) $(LDFLAGS)
+# 3) Programa a compilar
+ifndef APP
+  $(error Debes indicar APP, p.ej.  make APP=MiPrograma)
+endif
+SRC = $(APP).cc
 
-example_fractal: lib examples/main_fractal.cc
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o turtle_example_fractal examples/main_fractal.cc $(LIB) $(LDFLAGS)
+.PHONY: all lib clean
 
+# 4) Target por defecto: compila la biblioteca y luego tu APP
+all: lib $(APP)
+
+# 5) Construir la biblioteca
+lib: $(LIB)
+
+$(LIB): $(LIB_OBJS)
+	@echo "  AR    $@"
+	ar rcs $@ $^
+
+# 6) Regla implícita: .cc → .o
+#    (si tu Make no la tiene, descomenta estas líneas)
+#%.o: %.cc
+#	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+
+# 7) Compilar tu APP: APP.cc → ejecutable APP
+$(APP): $(SRC) $(LIB)
+	@echo "  CXX   $@"
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LIB) $(LDFLAGS)
+
+# 8) Limpiar objetos, librería y tu ejecutable
 clean:
-	rm -f src/*.o $(LIB) turtle_example_cb turtle_example_obj turtle_example_fractal
+	@echo "  CLEANING..."
+	rm -f $(LIB_OBJS) $(LIB) $(APP)

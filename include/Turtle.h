@@ -34,7 +34,9 @@ private:
   sf::Color penColor;
   float speed;
   std::vector<sf::Vertex> lines;
+  sf::ConvexShape shape;
   void moveTo(const sf::Vector2f &newPos, bool drawLine);
+  void updateDisplay();
 };
 
 // Modo callback
