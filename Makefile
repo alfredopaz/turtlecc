@@ -1,33 +1,46 @@
-CXX = g++
-CPPFLAGS = -Iinclude
-CXXFLAGS = -std=c++11
-LDFLAGS = -lsfml-graphics -lsfml-window -lsfml-system
+# Makefile que permite:  make APP=MiPrograma
 
-# Source files for the library
-LIB_SRCS = src/Turtle.cc src/App.cc
-LIB_OBJS = $(LIB_SRCS:.cc=.o)
-LIB      = libcppTurtle.a
+# 1) Compilador y flags
+CXX       = g++
+CPPFLAGS  = -Iinclude
+CXXFLAGS  = -std=c++11
+LDFLAGS   = -lsfml-graphics -lsfml-window -lsfml-system
 
-# Default target: build the library
-all: $(LIB)
+# 2) Biblioteca estática (Turtle + App)
+LIB_SRCS  = src/Turtle.cc src/App.cc
+LIB_OBJS  = $(LIB_SRCS:.cc=.o)
+LIB       = libcppTurtle.a
 
-# Archive library objects into a static library
+# 3) Programa a compilar
+ifndef APP
+  $(error Debes indicar APP, p.ej.  make APP=MiPrograma)
+endif
+SRC = $(APP).cc
+
+.PHONY: all lib clean
+
+# 4) Target por defecto: compila la biblioteca y luego tu APP
+all: lib $(APP)
+
+# 5) Construir la biblioteca
+lib: $(LIB)
+
 $(LIB): $(LIB_OBJS)
 	@echo "  AR    $@"
 	ar rcs $@ $^
 
-# Compile .cc -> .o for src directory
-src/%.o: src/%.cc
-	@echo "  CXX   $@"
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+# 6) Regla implícita: .cc → .o
+#    (si tu Make no la tiene, descomenta estas líneas)
+#%.o: %.cc
+#	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
-# Generic rule: compile any .cc in the project root into an executable
-# Usage: make MyProgram  (requires MyProgram.cc present in the root)
-%: %.cc $(LIB)
+# 7) Compilar tu APP: APP.cc → ejecutable APP
+$(APP): $(SRC) $(LIB)
 	@echo "  CXX   $@"
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(LIB) $(LDFLAGS)
 
-# Clean up objects, library, and executables corresponding to root .cc files
+# 8) Limpiar objetos, librería y tu ejecutable
 clean:
 	@echo "  CLEANING..."
-	rm -f $(LIB_OBJS) $(LIB) $(patsubst %.cc,%,$(wildcard *.cc))
+	rm -f $(LIB_OBJS) $(LIB) $(APP)
+
