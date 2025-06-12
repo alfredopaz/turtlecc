@@ -43,4 +43,3 @@ $(APP): $(SRC) $(LIB)
 clean:
 	@echo "  CLEANING..."
 	rm -f $(LIB_OBJS) $(LIB) $(APP)
-

@@ -49,11 +49,8 @@ cppTurtle/
 
 ```bash
 cd cppTurtle
-make                 # Compila la biblioteca y los ejemplos
-./turtle_example_cb  # Ejecuta ejemplo run(callback)
-./turtle_example_obj # Ejecuta ejemplo Application
-./turtle_example_fractal # Ejecuta fractal
-make clean           # Limpia artefactos
+make APP=test        # Compila el programa en test.cc
+make APP=test clean  # Limpia artefactos
 ```
 
 ---
